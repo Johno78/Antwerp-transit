@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Antwerp"/>
+<meta name="theme-color" content="#0a0a14"/>
+<title>My Antwerp Transit</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="stylesheet" href="css/app.css"/>
+</head><body>
+<div id="app">
+<header class="hdr"><div class="logo">A</div><div class="ht"><h1>My Antwerp Transit</h1><p>NMBS · De Lijn · Maps · Tripadvisor</p></div><span class="clock" id="clock">--:--</span></header>
+
+<main>
+<section id="tab-plan" class="tab active">
+  <div class="card">
+    <label>From</label>
+    <div class="row"><input id="from" list="stations" placeholder="Station or address" autocomplete="off"/><button class="mini" id="gps" title="Use my location">📍</button></div>
+    <label>To</label>
+    <input id="to" list="stations" placeholder="Station, place or address" autocomplete="off"/>
+    <datalist id="stations"></datalist>
+    <div class="row g"><button class="mini" id="swap">⇅ Swap</button><input id="when" type="datetime-local"/></div>
+    <button class="big gm" id="go-gm">🗺️ Open in Google Maps (transit)</button>
+    <button class="big tr" id="go-rail">🚆 Belgian train options (live)</button>
+  </div>
+  <div id="plan-out"></div>
+</section>
+
+<section id="tab-trains" class="tab">
+  <div class="card"><label>Station</label>
+    <div class="row"><input id="lb-station" list="stations" autocomplete="off"/><button class="mini" id="lb-go">Go</button></div>
+    <div class="chips" id="quick"></div></div>
+  <div id="lb-out"></div>
+  <h2>Disruptions</h2><div id="dist-out" class="muted">Loading…</div>
+</section>
+
+<section id="tab-bus" class="tab">
+  <div class="card">
+    <div id="key-box"><label>De Lijn API key</label>
+      <div class="row"><input id="dl-key" placeholder="Paste free key from data.delijn.be"/><button class="mini" id="dl-save">Save</button></div>
+      <p class="muted sm">Free: sign up at data.delijn.be → subscribe to “Open Data – Kern”. Stored only on this device.</p></div>
+    <label>Stop name</label>
+    <div class="row"><input id="dl-q" placeholder="e.g. Groenplaats, Antwerpen Centraal"/><button class="mini" id="dl-go">Search</button></div>
+  </div>
+  <div id="dl-out"></div>
+  <div class="card"><b>Without a key</b><p class="muted sm">Tap for De Lijn’s own journey planner and Google Maps transit.</p>
+  <a class="lnk" target="_blank" rel="noopener" href="https://www.delijn.be/en/">De Lijn website</a>
+  <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/@51.2194,4.4025,15z/data=!5m1!1e2">Google Maps transit layer</a></div>
+</section>
+
+<section id="tab-explore" class="tab">
+  <div class="chips" id="cats"></div>
+  <div id="ex-out"></div>
+</section>
+</main>
+
+<nav class="nav">
+  <button class="tb active" data-t="plan"><i>🧭</i>Plan</button>
+  <button class="tb" data-t="trains"><i>🚆</i>Trains</button>
+  <button class="tb" data-t="bus"><i>🚋</i>Bus &amp; Tram</button>
+  <button class="tb" data-t="explore"><i>⭐</i>Explore</button>
+</nav>
+</div>
+<script src="js/config.js"></script>
+<script src="js/explore-data.js"></script>
+<script src="js/app.js"></script>
+</body></html>
