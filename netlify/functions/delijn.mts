@@ -1,6 +1,10 @@
 import type { Config } from "@netlify/functions"
 
-const BASE = "https://api.delijn.be/DLKernOpenData/api/v1"
+// Only these two De Lijn calls are allowed through, with the key added server-side.
+const ROUTES: [RegExp, (m: RegExpMatchArray) => string][] = [
+  [/^\/search\/([^/]+)$/, (m) => `https://api.delijn.be/DLZoekOpenData/v1/zoek/haltes/${m[1]}`],
+  [/^\/realtime\/(\d+)\/(\d+)$/, (m) => `https://api.delijn.be/DLKernOpenData/api/v1/haltes/${m[1]}/${m[2]}/real-time`],
+]
 
 export default async (req: Request) => {
   const key = Netlify.env.get("DELIJN_KEY")
@@ -8,18 +12,19 @@ export default async (req: Request) => {
 
   const url = new URL(req.url)
   const path = url.pathname.replace(/^\/api\/delijn/, "")
-  // Only allow stop search and stop departures
-  if (!/^\/(zoeken\/haltes\/|haltes\/\d+\/\d+\/real-time)/.test(path)) {
-    return new Response("Not allowed", { status: 403 })
+  for (const [re, build] of ROUTES) {
+    const m = path.match(re)
+    if (m) {
+      const res = await fetch(build(m) + url.search, {
+        headers: { "Ocp-Apim-Subscription-Key": key },
+      })
+      return new Response(res.body, {
+        status: res.status,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
+      })
+    }
   }
-
-  const res = await fetch(BASE + path + url.search, {
-    headers: { "Ocp-Apim-Subscription-Key": key },
-  })
-  return new Response(res.body, {
-    status: res.status,
-    headers: { "content-type": "application/json", "cache-control": "no-store" },
-  })
+  return new Response("Not allowed", { status: 403 })
 }
 
 export const config: Config = {

@@ -66,24 +66,32 @@ async function disruptions(){
 let KEY=CONFIG.delijnKey||store.get('dlkey')||'';
 if(KEY)$('#key-box').style.display='none';
 $('#dl-save').onclick=()=>{KEY=$('#dl-key').value.trim();store.set('dlkey',KEY);if(KEY)$('#key-box').style.display='none'};
-const dlf=async p=>{
-  try{const r=await fetch('/api/delijn'+p);if(r.ok)return r.json()}catch(e){}
-  if(!KEY){$('#key-box').style.display='block';throw new Error('no key')}
-  const r=await fetch(DL+p,{headers:{'Ocp-Apim-Subscription-Key':KEY}});if(!r.ok)throw new Error(r.status);return r.json()};
+const DLU={search:q=>`https://api.delijn.be/DLZoekOpenData/v1/zoek/haltes/${encodeURIComponent(q)}`,rt:(e,h)=>`https://api.delijn.be/DLKernOpenData/api/v1/haltes/${e}/${h}/real-time`};
+// Try the hidden Netlify function first (GitHub deploy); fall back to calling De Lijn directly with the saved key.
+async function dl(proxyPath,directUrl,qs){
+  try{const r=await fetch('/api/delijn'+proxyPath+qs);if(r.ok&&(r.headers.get('content-type')||'').includes('json'))return r.json()}catch(e){}
+  if(!KEY){$('#key-box').style.display='block';throw new Error('Add your De Lijn key first.')}
+  let r;try{r=await fetch(directUrl+qs,{headers:{'Ocp-Apim-Subscription-Key':KEY}})}
+  catch(e){throw new Error('The browser blocked the call to De Lijn (CORS). Deploying through GitHub fixes this, because the hidden function makes the call instead.')}
+  if(!r.ok)throw new Error('De Lijn replied '+r.status+(r.status==401||r.status==403?' (key not accepted for this service; check you subscribed to the Open Data product).':r.status==404?' (address not found).':'.'));
+  return r.json();
+}
 $('#dl-go').onclick=async()=>{
-  const o=$('#dl-out');
+  const o=$('#dl-out'),q=$('#dl-q').value.trim();if(!q)return;
   o.innerHTML='<div class="card muted">Searching…</div>';
-  try{const j=await dlf('/zoeken/haltes/'+encodeURIComponent($('#dl-q').value)+'?maxAantalHits=8');
-    const h=j.haltes||[];o.innerHTML=h.length?h.map(x=>`<div class="card"><b>${esc(x.omschrijving)}</b><div class="muted sm">${esc(x.gemeente||'')} · stop ${x.haltenummer}</div><button class="chip" data-e="${x.entiteitnummer}" data-h="${x.haltenummer}" data-n="${esc(x.omschrijving)}">Live departures</button><div id="r${x.haltenummer}"></div></div>`).join(''):'<div class="card muted">No stops found.</div>';
+  try{const j=await dl('/search/'+encodeURIComponent(q),DLU.search(q),'?maxAantalHits=8');
+    const h=j.haltes||[];
+    o.innerHTML=h.length?h.map(x=>`<div class="card"><b>${esc(x.omschrijving||x.omschrijvingLang||'Stop')}</b><div class="muted sm">stop ${esc(x.haltenummer)}</div><button class="chip" data-e="${esc(x.entiteitnummer)}" data-h="${esc(x.haltenummer)}">Live departures</button><div id="r${esc(x.haltenummer)}"></div></div>`).join(''):'<div class="card muted">No stops found.</div>';
     $$('#dl-out .chip').forEach(b=>b.onclick=()=>rt(b));
-  }catch(e){o.innerHTML='<div class="card err">De Lijn error ('+esc(e.message)+'). Check your key.</div>'}
+  }catch(e){o.innerHTML='<div class="card err">'+esc(e.message)+'</div>'}
 };
 async function rt(b){
   const box=$('#r'+b.dataset.h);box.innerHTML='<p class="muted">Loading…</p>';
-  try{const j=await dlf(`/haltes/${b.dataset.e}/${b.dataset.h}/real-time?maxAantalDoorkomsten=10`);
-    const d=(j.halteDoorkomsten||[]).flatMap(x=>x.doorkomsten||[]).sort((a,b)=>(a.realTimeTijdstip||a.dienstregelingTijdstip).localeCompare(b.realTimeTijdstip||b.dienstregelingTijdstip));
-    box.innerHTML=d.length?d.slice(0,10).map(x=>{const t=(x.realTimeTijdstip||x.dienstregelingTijdstip).slice(11,16);return `<div class="dep"><span class="line">${esc(x.lijnnummer)}</span><div class="d"><b>${esc(x.richting||'')}</b><span>${x.realTimeTijdstip?'live':'scheduled'}</span></div><div class="t">${t}</div></div>`}).join(''):'<p class="muted">Nothing due.</p>';
-  }catch(e){box.innerHTML='<p class="err">Couldn\'t load departures.</p>'}
+  try{const j=await dl(`/realtime/${b.dataset.e}/${b.dataset.h}`,DLU.rt(b.dataset.e,b.dataset.h),'?maxAantalDoorkomsten=10');
+    const tm=x=>x.realTimeTijdstip||x.dienstregelingTijdstip||'';
+    const d=(j.halteDoorkomsten||[]).flatMap(x=>x.doorkomsten||[]).sort((a,b)=>tm(a).localeCompare(tm(b)));
+    box.innerHTML=d.length?d.slice(0,10).map(x=>`<div class="dep"><span class="line">${esc(x.lijnnummerPubliek||x.lijnnummer||'?')}</span><div class="d"><b>${esc(x.bestemming||x.richting||'')}</b><span>${x.realTimeTijdstip?'live':'scheduled'}</span></div><div class="t">${esc(tm(x).slice(11,16))}</div></div>`).join(''):'<p class="muted">Nothing due.</p>';
+  }catch(e){box.innerHTML='<p class="err">'+esc(e.message)+'</p>'}
 }
 
 $('#hotel').onclick=()=>{$('#from').value=CONFIG.hotel};
