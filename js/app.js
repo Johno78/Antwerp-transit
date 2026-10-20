@@ -86,6 +86,21 @@ async function rt(b){
   }catch(e){box.innerHTML='<p class="err">Couldn\'t load departures.</p>'}
 }
 
+$('#hotel').onclick=()=>{$('#from').value=CONFIG.hotel};
+// Pubs
+let pcat='all';const PC=[['all','All'],['near','Near hotel'],['old','Old town'],['beer','Beer'],['local','Local'],['sport','Sport'],['darts','Darts'],['music','Live music']];
+function renderPubs(){
+  $('#pub-cats').innerHTML=PC.map(([k,l])=>`<button class="chip ${k===pcat?'on':''}" data-k="${k}">${l}</button>`).join('');
+  $$('#pub-cats .chip').forEach(b=>b.onclick=()=>{pcat=b.dataset.k;renderPubs()});
+  const list=PUBS.filter(x=>pcat==='all'||x.z===pcat||x.t.includes(pcat)).sort((a,b)=>a.w-b.w);
+  $('#pub-out').innerHTML=list.map(x=>{
+    const dest=encodeURIComponent(x.n+', '+x.a+', Antwerp');
+    return `<div class="card ex"><span class="walk">🚶 ~${x.w} min</span><h3>${esc(x.n)}</h3><p>${esc(x.d)}</p><div class="muted sm">📍 ${esc(x.a)}${x.z==='old'?' · or take the tram/metro to Groenplaats':''}</div>
+    <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(CONFIG.hotel)}&destination=${dest}&travelmode=walking">Walk from hotel</a>
+    <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${dest}">Hours &amp; reviews</a></div>`}).join('')||'<div class="card muted">Nothing here.</div>';
+}
+renderPubs();
+
 // Explore
 let cat='all';const CATS=[['all','All'],['free','Free'],['family','Family'],['sights','Sights'],['museums','Museums'],['food','Food']];
 function renderEx(){

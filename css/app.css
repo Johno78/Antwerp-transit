@@ -39,3 +39,5 @@ h2{font-size:15px;margin:18px 4px 6px;color:var(--gold)}
 .g input{min-width:0;flex:1}
 input[type=datetime-local]{max-width:100%;-webkit-appearance:none;appearance:none;min-height:46px}
 input[type=datetime-local]{font-size:14px;padding:12px 8px}
+.walk{float:right;background:linear-gradient(90deg,var(--red),var(--gold));color:#000;font-weight:800;font-size:13px;border-radius:99px;padding:4px 10px}
+.tb{font-size:10.5px}

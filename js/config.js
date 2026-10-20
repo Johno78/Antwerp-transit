@@ -2,5 +2,6 @@
 const CONFIG = {
   delijnKey: '',
   defaultStation: 'Antwerpen-Centraal',
+  hotel: 'NH Collection Antwerp Centre, Pelikaanstraat 84, 2018 Antwerpen, Belgium',
   lang: 'en'
 };

@@ -18,7 +18,7 @@
 <section id="tab-plan" class="tab active">
   <div class="card">
     <label>From</label>
-    <div class="row"><input id="from" list="stations" placeholder="Station or address" autocomplete="off"/><button class="mini" id="gps" title="Use my location">📍</button></div>
+    <div class="row"><input id="from" list="stations" placeholder="Station or address" autocomplete="off"/><button class="mini" id="gps" title="Use my location">📍</button><button class="mini" id="hotel" title="From my hotel">🏨</button></div>
     <label>To</label>
     <input id="to" list="stations" placeholder="Station, place or address" autocomplete="off"/>
     <datalist id="stations"></datalist>
@@ -51,6 +51,12 @@
   <a class="lnk" target="_blank" rel="noopener" href="https://www.google.com/maps/@51.2194,4.4025,15z/data=!5m1!1e2">Google Maps transit layer</a></div>
 </section>
 
+<section id="tab-pubs" class="tab">
+  <div class="card"><b>🏨 Base: NH Collection Antwerp Centre</b><p class="muted sm">Pelikaanstraat 84, next to Centraal station. Walk times are estimates; use the buttons for live walking directions, hours and reviews.</p></div>
+  <div class="chips" id="pub-cats"></div>
+  <div id="pub-out"></div>
+</section>
+
 <section id="tab-explore" class="tab">
   <div class="chips" id="cats"></div>
   <div id="ex-out"></div>
@@ -61,10 +67,12 @@
   <button class="tb active" data-t="plan"><i>🧭</i>Plan</button>
   <button class="tb" data-t="trains"><i>🚆</i>Trains</button>
   <button class="tb" data-t="bus"><i>🚋</i>Bus &amp; Tram</button>
+  <button class="tb" data-t="pubs"><i>🍺</i>Pubs</button>
   <button class="tb" data-t="explore"><i>⭐</i>Explore</button>
 </nav>
 </div>
 <script src="js/config.js"></script>
 <script src="js/explore-data.js"></script>
+<script src="js/pubs-data.js"></script>
 <script src="js/app.js"></script>
 </body></html>

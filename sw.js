@@ -1,4 +1,4 @@
-const C='antwerp-v1';const A=['./','index.html','css/app.css','js/config.js','js/explore-data.js','js/app.js','manifest.json'];
+const C='antwerp-v2';const A=['./','index.html','css/app.css','js/config.js','js/explore-data.js','js/pubs-data.js','js/app.js','manifest.json'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(A))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x))))));
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});
